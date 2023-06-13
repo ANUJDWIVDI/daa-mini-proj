@@ -2,51 +2,128 @@
 <html>
 <head>
     <title>Flight Path Calculator</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Times+New+Roman&display=swap" rel="stylesheet">
+
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Times New Roman', serif;
+        }
+
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            overflow-y: auto;
+            max-height: 100vh;
+            background-color: #ffffff;
+        }
+
+        .city-img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 0.1rem solid #000000;
+            background-color: lightblue;
+        }
+
+        .city-images-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .city-images-container img {
+            margin: 0 10px;
+        }
+
+        .page-bg {
+            background-color: #0c67a8;
+            color: #050505;
+        }
+
+        h1, h2, h3 {
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-    <h1>Flight Path Calculator</h1>
-    <h2>Select Start and End Countries:</h2>
-    <form onsubmit="calculatePath(); return false;">
-        <label for="start_country">Start Country:</label>
-        <select id="start_country">
-            {% for country in cities %}
-                <option value="{{ country }}">{{ country }}</option>
-            {% endfor %}
-        </select>
-        <br><br>
-        <label for="end_country">End Country:</label>
-        <select id="end_country">
-            {% for country in cities %}
-                <option value="{{ country }}">{{ country }}</option>
-            {% endfor %}
-        </select>
-        <br><br>
-        <button type="submit">Calculate Route</button>
-    </form>
-    <br>
-    <h2>Distances:</h2>
-    <table>
-        <tr>
-            <th></th>
-            {% for country in cities %}
-                <th>{{ country }}</th>
-            {% endfor %}
-        </tr>
-        {% for i in range(num_cities) %}
-            <tr>
-                <th>{{ cities[i] }}</th>
-                {% for j in range(num_cities) %}
-                    <td>{{ distances[i][j] }}</td>
-                {% endfor %}
-            </tr>
-        {% endfor %}
-    </table>
-    <br>
-    <h2>Path Details:</h2>
-    <div id="result"></div>
 
+    <div class="page-bg">
+
+        <div class="container">
+
+        <br><br><br>
+
+        <h1 class="mt-4">Flight Path Calculator</h1>
+        <br>
+            <h2>Distances:</h2>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        {% for country in cities %}
+                            <th>{{ country }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for i in range(num_cities) %}
+                        <tr>
+                            <th>{{ cities[i] }}</th>
+                            {% for j in range(num_cities) %}
+                                <td>{{ distances[i][j] }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+
+
+            <div class="city-images-container">
+                <img id="start_city_img" class="city-img" src="" alt="Start City">
+                <img id="airplane_img" class="city-img" src="../static/aeroplanea.gif" alt="Airplane">
+                <img id="end_city_img" class="city-img" src="" alt="End City">
+            </div>
+
+            <h2 class="mt-4">Select Start and End Countries:</h2>
+            <form onsubmit="calculatePath(); return false;">
+                <div class="form-group">
+                    <label for="start_country">Start Country:</label>
+                    <select id="start_country" class="form-control">
+                        <option value="India" selected>India</option>
+                        {% for country in cities if country != "India" %}
+                            <option value="{{ country }}">{{ country }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="end_country">End Country:</label>
+                    <select id="end_country" class="form-control">
+                        <option value="Australia">Australia</option>
+                        {% for country in cities if country != "Australia" %}
+                            <option value="{{ country }}">{{ country }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Calculate Route</button>
+            </form>
+            <br>
+
+            <h2>Path Details:</h2>
+            <div id="result"></div>
+
+        </div>
+
+    </div>
+
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
         function calculatePath() {
+
             var startCountry = document.getElementById("start_country").value;
             var endCountry = document.getElementById("end_country").value;
 
@@ -70,21 +147,72 @@
                     var result = "<p><strong>Route:</strong> " + data.route + "</p>" +
                                  "<p><strong>Minimum Cost:</strong> " + data.min_cost + "</p>" +
                                  "<h3>Path Details:</h3>" +
-                                 "<table>" +
-                                 "<tr><th>Start</th><th>End</th><th>Cost</th></tr>";
+                                 "<table class='table'>" +
+                                 "<thead><tr><th>Start</th><th>End</th><th>Cost</th></tr></thead><tbody>";
                     for (var i = 0; i < data.path_details.length; i++) {
                         result += "<tr><td>" + data.path_details[i].start + "</td>" +
                                   "<td>" + data.path_details[i].end + "</td>" +
                                   "<td>" + data.path_details[i].cost + "</td></tr>";
                     }
-                    result += "</table>";
+                    result += "</tbody></table>";
                     document.getElementById("result").innerHTML = result;
+                    document.getElementById("airplane_img").src = "../static/aeroplanea.gif";
                 }
             })
             .catch((error) => {
                 console.error('Error:', error);
             });
         }
+
+        function updateCityImages() {
+            document.getElementById("airplane_img").src = "../static/aeroplanea.gif";
+            var startCountry = document.getElementById("start_country").value;
+            var endCountry = document.getElementById("end_country").value;
+
+            var cityImages = document.getElementsByClassName("city-img");
+
+            for (var i = 0; i < cityImages.length; i++) {
+                cityImages[i].src = "";
+                cityImages[i].classList.remove("d-none");
+            }
+            document.getElementById("airplane_img").src = "../static/aeroplanea.gif";
+            var startCityImg = document.getElementById("start_city_img");
+            if (startCityImg) {
+                if (startCountry === "India") {
+                    startCityImg.src = "static/india.jfif";
+                } else if (startCountry === "USA") {
+                    startCityImg.src = "static/usa.jfif";
+                } else if (startCountry === "China") {
+                    startCityImg.src = "static/china.jfif";
+                } else if (startCountry === "Australia") {
+                    startCityImg.src = "static/australia.jfif";
+                } else if (startCountry === "Brazil") {
+                    startCityImg.src = "static/brazil.png";
+                }
+            }
+
+            var endCityImg = document.getElementById("end_city_img");
+            if (endCityImg) {
+                if (endCountry === "India") {
+                    endCityImg.src = "static/india.jfif";
+                } else if (endCountry === "USA") {
+                    endCityImg.src = "static/usa.jfif";
+                } else if (endCountry === "China") {
+                    endCityImg.src = "static/china.jfif";
+                } else if (endCountry === "Australia") {
+                    endCityImg.src = "static/australia.jfif";
+                } else if (endCountry === "Brazil") {
+                    endCityImg.src = "static/brazil.png";
+                }
+            }
+        }
+
+        document.getElementById("start_country").addEventListener("change", updateCityImages);
+        document.getElementById("end_country").addEventListener("change", updateCityImages);
+
+        // Initial update of city images
+        updateCityImages();
+        document.getElementById("airplane_img").src = "../static/aeroplanea.gif";
     </script>
 </body>
 </html>
