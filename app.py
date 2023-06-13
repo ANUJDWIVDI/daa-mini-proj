@@ -2,90 +2,75 @@ from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
 
-# Flight routes and distances
-adjacency_matrix = [
-    [0, 5, 2, float('inf'), float('inf')],
-    [5, 0, float('inf'), 1, 6],
-    [2, float('inf'), 0, 3, float('inf')],
-    [float('inf'), 1, 3, 0, 2],
-    [float('inf'), 6, float('inf'), 2, 0]
+cities = ['India', 'USA', 'China', 'Australia', 'Brazil']
+distances = [
+    [0, 2000, 4000, 6000, 8000],
+    [2000, 0, 1000, 3000, 5000],
+    [4000, 1000, 0, 2000, 4000],
+    [6000, 3000, 2000, 0, 1000],
+    [8000, 5000, 4000, 1000, 0]
 ]
 
-airport_names = ['A', 'B', 'C', 'D', 'E']
-
-
-def find_shortest_routes(adjacency_matrix):
-    n = len(adjacency_matrix)
-    shortest_distances = [[0] * n for _ in range(n)]
-    next_hops = [[0] * n for _ in range(n)]
-
-    for i in range(n):
-        for j in range(n):
-            shortest_distances[i][j] = adjacency_matrix[i][j]
-            if adjacency_matrix[i][j] != float('inf'):
-                next_hops[i][j] = j
-
-    for k in range(n):
-        for i in range(n):
-            for j in range(n):
-                if shortest_distances[i][j] > shortest_distances[i][k] + shortest_distances[k][j]:
-                    shortest_distances[i][j] = shortest_distances[i][k] + shortest_distances[k][j]
-                    next_hops[i][j] = next_hops[i][k]
-
-    return shortest_distances, next_hops
-
-
-def reconstruct_route(next_hops, source_index, destination_index):
-    if next_hops[source_index][destination_index] == 0:
-        return []
-
-    route = [source_index]
-    while source_index != destination_index:
-        source_index = next_hops[source_index][destination_index]
-        route.append(source_index)
-
-    return route
-
+# Update distances to prefer going through intermediate cities
+for i in range(len(distances)):
+    for j in range(len(distances[i])):
+        for k in range(len(distances)):
+            if distances[i][j] > distances[i][k] + distances[k][j]:
+                distances[i][j] = distances[i][k] + distances[k][j]
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    num_cities = len(cities)
+    return render_template('index.html', cities=cities, distances=distances, num_cities=num_cities)
 
 
 @app.route('/calculate_path', methods=['POST'])
 def calculate_path():
-    data = request.get_json()
-    start_city = data['start_city']
-    end_city = data['end_city']
+    start_country = request.json['start_country']
+    end_country = request.json['end_country']
 
-    source_index = ord(start_city.upper()) - ord('A')
-    destination_index = ord(end_city.upper()) - ord('A')
+    start_index = cities.index(start_country)
+    end_index = cities.index(end_country)
 
-    if source_index < 0 or source_index >= len(adjacency_matrix) or destination_index < 0 or destination_index >= len(
-            adjacency_matrix):
-        response_data = {
-            'error': 'Invalid airport selection. Please try again.'
-        }
-        return jsonify(response_data)
+    result = find_path(start_index, end_index)
+    return jsonify(result)
 
-    shortest_distances, next_hops = find_shortest_routes(adjacency_matrix)
-    shortest_route = reconstruct_route(next_hops, source_index, destination_index)
 
-    if not shortest_route:
-        response_data = {
-            'error': 'No route available between the selected airports.'
-        }
-        return jsonify(response_data)
+def find_path(start, end):
+    num_cities = len(cities)
+    visited = [False] * num_cities
+    path = []
+    min_cost = float('inf')
+    path_details = []
 
-    route = ' -> '.join(airport_names[airport_index] for airport_index in shortest_route)
-    min_cost = shortest_distances[source_index][destination_index]
+    def backtrack(curr, cost):
+        nonlocal min_cost
 
-    response_data = {
-        'route': route,
-        'min_cost': min_cost
-    }
+        if curr == end:
+            if cost < min_cost:
+                min_cost = cost
+                path_details.clear()
+                for i in range(len(path) - 1):
+                    path_details.append({
+                        'start': cities[path[i]],
+                        'end': cities[path[i + 1]],
+                        'cost': distances[path[i]][path[i + 1]]
+                    })
 
-    return jsonify(response_data)
+        for i in range(num_cities):
+            if not visited[i] and distances[curr][i] != 0:
+                visited[i] = True
+                path.append(i)
+                backtrack(i, cost + distances[curr][i])
+                visited[i] = False
+                path.pop()
+
+    visited[start] = True
+    path.append(start)
+    backtrack(start, 0)
+
+    route = ' -> '.join([cities[i] for i in path])
+    return {'route': route, 'min_cost': min_cost, 'path_details': path_details}
 
 
 if __name__ == '__main__':

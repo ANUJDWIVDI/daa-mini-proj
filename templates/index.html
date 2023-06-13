@@ -1,42 +1,58 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Flight Route Calculator</title>
+    <title>Flight Path Calculator</title>
 </head>
 <body>
-    <h1>Flight Route Calculator</h1>
-    <form onsubmit="event.preventDefault(); calculatePath()">
-        <label for="start_city">Start City:</label>
-        <select id="start_city">
-            <option value="A">A</option>
-            <option value="B">B</option>
-            <option value="C">C</option>
-            <option value="D">D</option>
-            <option value="E">E</option>
+    <h1>Flight Path Calculator</h1>
+    <h2>Select Start and End Countries:</h2>
+    <form onsubmit="calculatePath(); return false;">
+        <label for="start_country">Start Country:</label>
+        <select id="start_country">
+            {% for country in cities %}
+                <option value="{{ country }}">{{ country }}</option>
+            {% endfor %}
         </select>
         <br><br>
-        <label for="end_city">End City:</label>
-        <select id="end_city">
-            <option value="A">A</option>
-            <option value="B">B</option>
-            <option value="C">C</option>
-            <option value="D">D</option>
-            <option value="E">E</option>
+        <label for="end_country">End Country:</label>
+        <select id="end_country">
+            {% for country in cities %}
+                <option value="{{ country }}">{{ country }}</option>
+            {% endfor %}
         </select>
         <br><br>
         <button type="submit">Calculate Route</button>
     </form>
     <br>
+    <h2>Distances:</h2>
+    <table>
+        <tr>
+            <th></th>
+            {% for country in cities %}
+                <th>{{ country }}</th>
+            {% endfor %}
+        </tr>
+        {% for i in range(num_cities) %}
+            <tr>
+                <th>{{ cities[i] }}</th>
+                {% for j in range(num_cities) %}
+                    <td>{{ distances[i][j] }}</td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+    <br>
+    <h2>Path Details:</h2>
     <div id="result"></div>
 
     <script>
         function calculatePath() {
-            var startCity = document.getElementById("start_city").value;
-            var endCity = document.getElementById("end_city").value;
+            var startCountry = document.getElementById("start_country").value;
+            var endCountry = document.getElementById("end_country").value;
 
             var data = {
-                start_city: startCity,
-                end_city: endCity
+                start_country: startCountry,
+                end_country: endCountry
             };
 
             fetch('/calculate_path', {
@@ -51,8 +67,18 @@
                 if (data.error) {
                     document.getElementById("result").innerHTML = "<p><strong>Error:</strong> " + data.error + "</p>";
                 } else {
-                    document.getElementById("result").innerHTML = "<p><strong>Route:</strong> " + data.route + "</p>" +
-                                                                   "<p><strong>Minimum Cost:</strong> " + data.min_cost + "</p>";
+                    var result = "<p><strong>Route:</strong> " + data.route + "</p>" +
+                                 "<p><strong>Minimum Cost:</strong> " + data.min_cost + "</p>" +
+                                 "<h3>Path Details:</h3>" +
+                                 "<table>" +
+                                 "<tr><th>Start</th><th>End</th><th>Cost</th></tr>";
+                    for (var i = 0; i < data.path_details.length; i++) {
+                        result += "<tr><td>" + data.path_details[i].start + "</td>" +
+                                  "<td>" + data.path_details[i].end + "</td>" +
+                                  "<td>" + data.path_details[i].cost + "</td></tr>";
+                    }
+                    result += "</table>";
+                    document.getElementById("result").innerHTML = result;
                 }
             })
             .catch((error) => {
