@@ -1,0 +1,174 @@
+1. Design a Program for creating machine that accepts three consecutive one.
+myinput = input("Enter a string of 0 & 1: ")
+if len(myinput)<3:
+print("Not Accepted (string length is too small)")
+elif len(myinput)==3:
+if myinput=="111":
+print("Accepted")
+else:
+print("Not Accepted")
+else:
+count1 = 0
+for i in myinput:
+if count1 == 3:
+break
+if i == "1":
+count1 +=1
+else:
+count1 = 0
+if count1 == 3:
+print("Accepted")
+else:
+print("Not Accepted")
+
+### Design a Program for creating machine that accepts at most three consecutive one.
+
+2. Design a Program for creating machine that accepts the string always ending with 101.
+myinput = input("Enter a string of 0 & 1: ")
+if len(myinput)<3:
+    print("Not Accepted (string length is too small)")
+elif len(myinput)==3:
+    if myinput=="101":
+        print("Accepted")
+    else:
+        print("Not Accepted")
+else:
+    myinput = int(myinput)
+    mynum = 0
+    for i in range (0,3):
+        temp = int(myinput%10)
+        mynum = mynum*10 + temp
+        myinput = int(myinput/10)
+    if mynum == 101:
+        print("Accepted")
+    else:
+        print("Not Accepted")
+
+###Design a Program for creating machine that accepts the string always starts with 101.
+
+3. Design a Program for Mode 3 Machine
+
+#int() function returns an integer from a given object or converts a number in a given base to a decimal
+def binaryToDecimal(n):
+    return int(n,2)
+
+# Driver code
+myinput = input("Enter the binary value: ")
+decimal_number = binaryToDecimal(myinput)
+print (decimal_number)
+if decimal_number % 3 == 0:
+    print("Mod3 is accepted")
+else:
+    print("Mod3 is Not Accepted")
+
+4. ##Design a program for accepting decimal number divisible by 2.
+
+myinput = int(input("Enter a number: "))
+if myinput%2 == 0:
+    print("Given number is divisible by 2")
+else:
+    print("Given number is not divisible by 2")
+
+5. #Design a program for creating a machine which accepts string having equal no. of 1's and O's
+
+myinput = input("Enter a string of 0's & 1's: ")
+if len(myinput)<2:
+    print("Not Accepted string length is too small")
+else:
+    count0 = 0
+    count1 = 0
+    for i in myinput:
+        if i=="0":
+            count0 += 1
+        if i=="1":
+            count1 += 1
+    if count0 == count1:
+        print("Accepted")
+    else:
+        print("Not Accepted")
+
+6. #Design a program for creating a machine which count number of 1's and O's in a given string.
+
+myinput = input("Enter a string of 0's & 1's: ")
+count0 = 0
+count1 = 0
+for i in myinput:
+    if i=="0":
+        count0 += 1
+    if i=="1":
+        count1 += 1
+print("Total no. of 0's are:", count0)
+print("Total no. of 1's are:", count1)
+
+7. #Design a Program to find 2's complement of a given binary number.
+
+# Function to convert Binary number to Decimal number
+def binaryToDecimal(n):
+    return int(n,2)
+# Function to convert Decimal number To Binary number
+def decimalToBinary(n):
+    if(n > 1):
+# divide with integral result
+# (discard remainder)
+        decimalToBinary(n//2)
+    print(n%2, end='')
+
+myinput = input("Enter the binary value: ")
+oncecomp = ""
+for i in myinput:
+    if i == "0":
+        oncecomp = oncecomp + "1"
+    else:
+        oncecomp = oncecomp + "0"
+print("1's Compliment of the given binary number is:", oncecomp )
+decnumber = binaryToDecimal(oncecomp)
+decnumber += 1
+print("2's Compliment of the given binary number is: ", end='')
+decimalToBinary(decnumber)
+
+##Can you think something else for finding 2’s complement???
+
+8. #Program to increment the given binary number by 1
+# Function to convert Binary number to Decimal number
+def binaryToDecimal(n):
+    return int(n,2)
+def decimalToBinary(n):
+    if(n > 1):
+        decimalToBinary(n//2)
+    print(n%2, end='')
+
+myinput = input("Enter the binary value: ")
+decimal_number = binaryToDecimal(myinput)
+decimal_number += 1
+print("After incrementing by 1: ", end='')
+decimalToBinary(decimal_number)
+
+9. Design a Program to create PDA machine that accept the well-formed parenthesis
+open_list = ["[","{","("]
+close_list = ["]","}",")"]
+def check(myStr):
+    stack = []
+    for i in myStr:
+        if i in open_list:
+            stack.append(i)
+        elif i in close_list:
+            pos = close_list.index(i)
+            if ((len(stack) > 0) and (open_list[pos] == stack[len(stack)-1])):
+                    stack.pop()
+            else:
+                return "Unbalanced"
+    if len(stack) == 0:
+        return "Balanced"
+    else:
+        return "Unbalanced"
+
+myinput = input("string: ")
+string = "{[]{()}}"
+print(string,"-", check(string))
+string = "[{}{})(]"
+print(string,"-", check(string))
+string = "((()"
+print(string,"-",check(string))
+
+
+
